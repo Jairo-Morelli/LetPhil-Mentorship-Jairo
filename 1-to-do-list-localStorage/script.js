@@ -52,11 +52,13 @@ function displayTasks()
 {
 // 1. Get the <ul> element where we will show the list of tasks - name of variable "taskList"
 const taskList = document.getElementById("taskList");
+
 // 2. Clear any previous content inside the list so it doesn't repeat
 for(let i =taskList.children.length-1; i > -1; i--)
 {
     taskList.children[i].remove();
 }
+
 // 3. Get the saved tasks from LocalStorage and turn them back into an array
 let savedTasks = localStorage.getItem("tasks");
 let parsedTasks;
@@ -71,16 +73,11 @@ parsedTasks.forEach((task)=>{
     const deleteBtn= document.createElement("button");                // in its array(which is localStorage.getItem("tasks")).
 
     deleteBtn.textContent="remove current task";
-    deleteBtn.setAttribute("onclick",`removeTask(${count-1})`);     // I need to link the functionality to remove with the associated list entry   
-                                                                   // the reason this works because each list item, will have its own associated 
-                                                                  // removeTask(1), removeTask(2), because I am creating literal html button elements
-                                                                 // with there own specific onclick() attributes
-   
-    // 6. Set the content of the <li> to show the task and a delete button - use template literal
-    newItem.textContent=`${count}. ${task}`;
-    // 7. Add the <li> to the task list
-    taskList.insertAdjacentElement("beforeend",newItem);
-
+    deleteBtn.setAttribute("onclick",`removeTask(${count-1})`);                     
+    // 6. Set the content of the <li> to show the task and a delete button - use template literal              // I need to link the functionality to remove with the associated list entry                                                                                                                                                                                                         
+    newItem.textContent=`${count}. ${task}`;                                                                  // the reason this works because each list item, will have its own associated
+    // 7. Add the <li> to the task list                                                                      // removeTask(1), removeTask(2), because I am creating literal html button elements
+    taskList.insertAdjacentElement("beforeend",newItem);                                                    // with there own specific onclick() attributes
     newItem.insertAdjacentElement("beforeend",deleteBtn);
 });
 }
