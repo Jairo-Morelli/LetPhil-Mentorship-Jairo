@@ -20,15 +20,28 @@ Also it helps to understand that you're creating a to-do list as well.
 
 //  Function to add a new task
 // Get the input field element using its ID "task"
+let hasEnded;
 function addTask()
 {
     const input = document.getElementById("task");
+    // A. Checking Immediately if the value of input.value is valid
+    if(input.value==="")
+    {
+        alert("Cannot add empty task");
+        return;
+    }
+    
     // 1. Get the existing tasks from LocalStorage - name variable "tasks"
     // JSON.parse turns the string back into an array
     // If there are no tasks yet, use an empty array []
     let savedTasks = localStorage.getItem("tasks");
     let parsedTasks;
     savedTasks !=null ?  parsedTasks=JSON.parse(savedTasks) : parsedTasks = [];    //Use this now, but you might have to change later
+
+    // B. Checking to see if new input.value is a duplicate of any other saved task
+    if(CheckForDuplicates(input.value,parsedTasks)){
+        return;
+    }
    
 
     // 2. Push (add) the value typed by the user into the tasks array
@@ -45,11 +58,68 @@ function addTask()
     input.value=""; 
 }
 
+function CheckForDuplicates(input_value, parsedTasks)
+{
+    for(let i = 0; i < parsedTasks.length; i++)
+    {
+        if(compareStrings(input_value,parsedTasks[i])==true)
+        {
+            alert("Existing task cannot be added, because it is already a duplicate of an already saved task on application.");
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+I'll count a duplicate with any piece of array string that has the same characters, 
+from the first index of a character to the last index of characters.I will also including
+spaces from the first index of a array string with an character til its last index of an array
+string. 
+
+I will remove the beginning and ending spaces of a string, and not count those, 
+beginning and ending spaces of a string as reasons to decided if this is a 
+string or not.
+*/
+function compareStrings(string1, string2)
+{
+    const trimmedStr0 =string1.trim();
+    const trimmedStr1 =string2.trim();
+
+     if(trimmedStr0===trimmedStr1){
+        return true;
+     }else{
+        return false;
+     }
+}
+/* 
+    You have two options: 
+
+    1. You can either create a global variable, that maintains the state of the do-to list. 
+
+    2. or you can create a "local state" and keep passing it onto the the next display task as a 
+    temporary variable. 
+*/
+ 
+function setHasEnded()
+{
+    if(hasEnded==undefined || hasEnded ===null)
+    {
+        hasEnded=false;
+    }else{
+        return hasEnded
+    }
+}
 
 
 // Function displayTasks() to display all tasks from LocalStorage
 function displayTasks()
 {
+//At the beginning of each displayTask, see if we are "create"/"starting" a new list
+//Once has ended has been given a false boolean value, it is now up to you to determine, 
+//what constitutes as a true hasEnded value.
+setHasEnded();
+
 // 1. Get the <ul> element where we will show the list of tasks - name of variable "taskList"
 const taskList = document.getElementById("taskList");
 
@@ -63,7 +133,7 @@ for(let i =taskList.children.length-1; i > -1; i--)
 let savedTasks = localStorage.getItem("tasks");
 let parsedTasks;
 savedTasks !== null ? parsedTasks = JSON.parse(savedTasks) : parsedTasks=[];
-
+   
 // 4. Use forEach to loop through the array and display each task
 let count=0;                 
 parsedTasks.forEach((task)=>{
@@ -80,6 +150,14 @@ parsedTasks.forEach((task)=>{
     taskList.insertAdjacentElement("beforeend",newItem);                                                    // with there own specific onclick() attributes
     newItem.insertAdjacentElement("beforeend",deleteBtn);
 });
+// 4a. After refreshing the list, check to see if there are any tasks left,
+// and if the hasEnded flag is true as well. 
+// If true congratulate the users.
+if(parsedTasks.length===0 && hasEnded===true)
+    {
+        alert("There are no more tasks left, congratulations, you've been very productive");
+        return;
+    }
 }
 
 // Function to remove a task from the list - function name removeTask()
@@ -95,6 +173,14 @@ parsedTasks.splice(index,1);
 
 // 3. Save the updated tasks back into LocalStorage
 localStorage.setItem("tasks",JSON.stringify(parsedTasks));
+// 3a. Check to see if you've removed all task, after removing a task
+// if you've removed all the tasks from local storage, set hasEnded variable 
+// to true.
+if(parsedTasks.length===0 && hasEnded===false)
+{
+    hasEnded=true;
+}
+
 // 4. Update the display so the removed task disappears from the screen
 displayTasks();
 
