@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        display: flex;
+        flex: 1;
+        border: 1px solid hotpink;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .items-ui {
+        width: 800px;
+      }
+
+      .input-container input {
+        height: 30px;
+        border-radius: 3px;
+        margin: 0 10px;
+        padding: 5px;
+      }
+
+      .input-container > button {
+        height: 40px;
+        width: 60px;
+        border-radius: 3px;
+        font-size: 20px;
+      }
+
+      #listContainer {
+        padding: 10px;
+      }
+
+      .list-item {
+        width: 300px;
+        border: 1px solid black;
+        padding: 10px 30px;
+        border-radius: 3px;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="items-ui">
+        <h1 style="margin-bottom: 10px">Shopping Cart</h1>
+        <div class="input-container">
+          <input id="productName" type="text" placeholder="name" />
+          <input id="productPrice" type="number" placeholder="price" />
+          <input id="productImage" type="text" placeholder="image url" />
+          <button id="addButton">+</button>
+        </div>
+        <div id="listContainer"></div>
+      </div>
+    </div>
+    <script>
+      let products = [
+        {
+          name: "shirt",
+          price: "20",
+          image:
+            "https://media.istockphoto.com/id/488160041/photo/mens-shirt.jpg?s=612x612&w=0&k=20&c=xVZjKAUJecIpYc_fKRz_EB8HuRmXCOOPOtZ-ST6eFvQ=",
+          count: 1,
+        },
+      ];
+
+      addButton.addEventListener("click", function () {
+        const name = productName.value;
+        const price = productPrice.value;
+        const image = productImage.value;
+        const count = 1;
+        products.push({
+          name,
+          price,
+          image,
+          count,
+        });
+
+        renderListItems();
+      });
+
+      // https://media.istockphoto.com/id/488160041/photo/mens-shirt.jpg?s=612x612&w=0&k=20&c=xVZjKAUJecIpYc_fKRz_EB8HuRmXCOOPOtZ-ST6eFvQ=
+      // https://media.istockphoto.com/id/697913308/photo/orange-men-shorts-for-swimming.jpg?s=612x612&w=0&k=20&c=Ta47ejxSIVtknPGGZ92BB_KGI9bLLZuU_C0EaOXl0AA=
+
+      function renderListItems() {
+        listContainer.innerHTML = "";
+
+        let totalCost = 0;
+        for (let i = 0; i < products.length; i++) {
+          const current = products[i];
+          console.log(current);
+          const listItem = ListItem(
+            i,
+            current.name,
+            current.price,
+            current.image,
+            current.count
+          );
+          listContainer.innerHTML += listItem;
+
+          totalCost += current.count * current.price;
+        }
+
+        console.log("totalCost =", totalCost);
+      }
+
+      const ListItem = (idx, name, price, image, count) => {
+        return `
+          <div class="list-item">
+            <div>
+              <p>${name}</p>
+              <p>${price}</p>
+            </div>
+            <div>
+              <button onclick="decreaseCount(${idx}, ${count})">-</button>
+              <p>${count}</p>
+              <button onclick="increaseCount(${idx}, ${count})">+</button>
+            </div>
+            <div>
+              <img
+                src="${image}"
+                height="70"
+              />
+              <p>${price * count}</p>
+            </div>
+          </div>
+        `;
+      };
+
+      function decreaseCount(idx, count) {
+        console.log("decrase =", idx);
+        if (count === 1) {
+          products.splice(idx, 1);
+        }
+
+        renderListItems();
+      }
+
+      function increaseCount(idx, count) {
+        count++;
+        products[idx].count = count;
+        renderListItems();
+      }
+
+      window.onload = renderListItems();
+
+      // const promptInput = prompt("user input");
+      // console.log(promptInput);
+    </script>
+  </body>
+</html>
+
+<!-- 
+
+[] - make user input where they can input product name
+[] - make user input where they can input price
+[] - make list where items will be listed
+[] - make price display for total price
+[] - make remove item feature
+[] - make edit item feature
+[] - how many items there are
+
+-->
