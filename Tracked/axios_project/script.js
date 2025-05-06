@@ -11,6 +11,8 @@ const searchInput = document.getElementById("searchInput");
 const userContainer = document.getElementById("userContainer");
 const loader = document.getElementById("loader");
 const themeToggle = document.getElementById("themeToggle");
+const genderInfoContainer = document.getElementById("GenderCount");
+const averageAgeContainer = document.getElementById("AverageAge");
 
 // Task 2: Initialize in-memory data storage
 // 2.1 Declare let users as an empty array to hold fetched user objects
@@ -23,20 +25,53 @@ let users = [];
 // 3.3 Add an input listener on searchInput that calls filterUsers()
 // 3.4 Add a change listener on themeToggle that calls toggleTheme()
 
+
+function trackAsyncExecution(asyncFn) {
+  let hasRun = false;
+  let isDone = false;
+
+  const wrapped = async (...args) => {
+    hasRun = true;
+    try {
+      const result = await asyncFn(...args);
+      isDone = true;
+      return result;
+    } catch (err) {
+      isDone = true;
+      throw err;
+    }
+  };
+
+  wrapped.wasCalled = () => hasRun;
+  wrapped.isFinished = () => isDone;
+
+  return wrapped;
+}
+
 fetchBtn.addEventListener("click", () => fetchUsers(1));
 fetchMultipleBtn.addEventListener("click", async () => {
 
-  //what you want to do is once this function is finished
-  //run the gender count function.
-  const Promise0= await fetchUsers(5);
-  const Promise1= await CountGenders();
+  const trackedAsynFetchFun = trackAsyncExecution(fetchUsers);
+  const trackedAsynGenFun = trackAsyncExecution(CountGenders);
+  const trackedAsynAverageFun = trackAsyncExecution(calculateAverageAge);
 
-  const arrayOfPromises=[Promise0,Promise1];
+  await trackedAsynFetchFun(5).then(() => {
 
-  Promise.all(arrayOfPromises).then(result =>{
-    console.log('all',result);
+
   })
-  //When you do await, it is going to continue execution
+
+  if (trackedAsynFetchFun.isFinished() == true) {
+    trackedAsynGenFun().then(() => {
+
+      if (trackedAsynGenFun.isFinished() == true) {
+        trackedAsynAverageFun().then(() => {
+
+        })
+      }
+    })
+  }
+
+
 
 
 });
@@ -50,23 +85,23 @@ themeToggle.addEventListener("change", toggleTheme);
 // 4.4 Fetch random users from API using count parameter
 //   4.4.1 On success: hide loader, update users array, call renderUsers(users)
 //   4.4.2 On error: hide loader, display error in userContainer, log error
-function fetchUsers(count) {
+async function fetchUsers(count) {
   users = [];
   userContainer.innerHTML = "";
   loader.style.display = "block";
 
-  const req = axios.get(`https://randomuser.me/api/?results=${count}`);
 
-  req.then((response) => {
+  try {
+    const req = await axios.get(`https://randomuser.me/api/?results=${count}`);
     loader.style.display = "none";
-    users = response.data.results;
+    users = req.data.results;
+    console.log(users);
     renderUsers(users);
-  }
-  ).catch((error) => {
+  } catch (error) {
     loader.style.display = "none";
-    userContainer.innerHTML = "<p> Error fetching data</p>";
+    userContainer.innerHTML = "<p> Error fetching data </p>";
     console.error(error);
-  })
+  }
 
   // axios
   //   .get(`https://randomuser.me/api/?results=${count}`)
@@ -119,8 +154,31 @@ async function CountGenders() {
       females++;
     }
   }
-  alert("there are " + males + " males, and " + females + " females. In your database.");
+  //alert("there are " + males + " males, and " + females + " females. In your database.");m
+
+  const infoText = document.createElement("p");
+  infoText.textContent = "Males: " + males + ", Females: " + females;
+
+  genderInfoContainer.append(infoText);
 }
+
+async function calculateAverageAge() {
+  let sum = 0;
+
+
+  for (let i = 0; i < users.length; i++) {
+    sum += users[i].dob.age;
+  }
+
+  const averageAge = sum / users.length;
+
+  const infoText = document.createElement("p");
+  infoText.textContent = "Average age:" + averageAge;
+
+  averageAgeContainer.append(infoText);
+}
+
+
 
 function inputCMD(cmd) {
   let inputCommand = cmd;
